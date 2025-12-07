@@ -1,13 +1,13 @@
 pipeline {
     agent any
 
-    parameters {
-        booleanParam(
-            name: 'DEPLOY_NOW',
-            defaultValue: true,
-            description: 'Trigger deployment to EC2'
-        )
-    }
+    // parameters {
+    //     booleanParam(
+    //         name: 'DEPLOY_NOW',
+    //         defaultValue: true,
+    //         description: 'Trigger deployment to EC2'
+    //     )
+    // }
 
     environment {
         EC2_USER = 'ubuntu'
@@ -25,9 +25,9 @@ pipeline {
         }
 
         stage('Deploy to EC2') {
-            when {
-                expression { params.DEPLOY_NOW == true }
-            }
+            // when {
+            //     expression { params.DEPLOY_NOW == true }
+            // }
             steps {
                 // Use SSH private key from Jenkins credentials
                 withCredentials([sshUserPrivateKey(credentialsId: SSH_CRED,
