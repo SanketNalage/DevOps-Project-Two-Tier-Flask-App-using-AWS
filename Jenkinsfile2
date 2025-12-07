@@ -50,6 +50,7 @@ pipeline {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
                             cd ${PROJECT_DIR}
+                            sudo docker compose down || true
                             echo "Building and Starting Containers..."
                             docker compose up -d --build
                         '
