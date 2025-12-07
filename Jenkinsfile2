@@ -56,6 +56,7 @@ pipeline {
                             # Extra safety: remove any old mysql-db container with same name
                             echo "Cleaning up any old mysql-db container..."
                             sudo docker rm -f mysql-db || true
+                            sudo docker rm -f flask-app || true
 
                             echo "Building and Starting Containers..."
                             sudo docker compose up -d --build --remove-orphans
