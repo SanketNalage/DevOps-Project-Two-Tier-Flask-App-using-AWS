@@ -1,0 +1,35 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# VSCode settings
+.vscode/
+
+# Environment variables
+*.env
+.env
+
+# Logs
+*.log
+
+# Byte-compiled files
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# MacOS files
+.DS_Store
+
+# Pip install artifacts
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
