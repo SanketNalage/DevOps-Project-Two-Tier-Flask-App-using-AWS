@@ -12,7 +12,7 @@ pipeline {
     environment {
         EC2_USER = 'ubuntu'
         EC2_HOST = '65.0.139.32'
-        SSH_CRED = 'ec2-ssh-key'   // Jenkins Credentials ID
+        SSH_CRED = 'ec2-ssh-key'   // Jenkins credential ID
         APP_DIR = '/home/ubuntu/DevOps-Project-Two-Tier-Flask-App-using-AWS'
     }
 
@@ -29,10 +29,12 @@ pipeline {
                 expression { params.DEPLOY_NOW == true }
             }
             steps {
-                sshagent(credentials: [SSH_CRED]) {
+                // Use SSH private key from Jenkins credentials
+                withCredentials([sshUserPrivateKey(credentialsId: SSH_CRED,
+                                                  keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    echo "Deploying to EC2..."
-                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'cd ${APP_DIR} && ./deploy.sh'
+                    echo "Using SSH key at: \$SSH_KEY"
+                    ssh -o StrictHostKeyChecking=no -i "\$SSH_KEY" ${EC2_USER}@${EC2_HOST} 'cd ${APP_DIR} && ./deploy.sh'
                     """
                 }
             }
