@@ -3,9 +3,9 @@ pipeline {
     agent any
 
     environment {
-        EC2_IP = '65.0.139.32'
-        EC2_USER = 'ubuntu'
-        REPO_URL = 'https://github.com/SanketNalage/DevOps-Project-Two-Tier-Flask-App-using-AWS.git' // <--- CHANGE THIS
+        EC2_IP      = '65.0.139.32'
+        EC2_USER    = 'ubuntu'
+        REPO_URL    = 'https://github.com/SanketNalage/DevOps-Project-Two-Tier-Flask-App-using-AWS.git'
         SSH_CRED_ID = 'ec2-ssh-key'
         PROJECT_DIR = '/home/ubuntu/student-app'
     }
@@ -14,7 +14,6 @@ pipeline {
         stage('Check Connectivity') {
             steps {
                 sshagent([SSH_CRED_ID]) {
-                    // Simple ping to make sure EC2 is alive before we try anything heavy
                     sh "ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} 'echo Connection Successful! Server is ready.'"
                 }
             }
@@ -25,14 +24,14 @@ pipeline {
                 sshagent([SSH_CRED_ID]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
-                            # 1. Create directory if it doesn not exist
+                            # 1. Create directory if it does not exist
                             mkdir -p ${PROJECT_DIR}
                             cd ${PROJECT_DIR}
 
                             # 2. Check if git is already initialized
                             if [ -d ".git" ]; then
                                 echo "Repository exists. Pulling latest changes..."
-                                git reset --hard  # Force discard local changes to avoid conflicts
+                                git reset --hard
                                 git pull origin main
                             else
                                 echo "First time deployment. Cloning repository..."
@@ -50,7 +49,14 @@ pipeline {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
                             cd ${PROJECT_DIR}
-                            sudo docker compose down || true
+
+                            # Bring down current stack (same compose project)
+                            sudo docker compose down --remove-orphans || true
+
+                            # Extra safety: remove any old mysql-db container with same name
+                            echo "Cleaning up any old mysql-db container..."
+                            sudo docker rm -f mysql-db || true
+
                             echo "Building and Starting Containers..."
                             sudo docker compose up -d --build --remove-orphans
                         '
@@ -63,7 +69,7 @@ pipeline {
             steps {
                 sshagent([SSH_CRED_ID]) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP}'
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_IP} '
                             echo "Cleaning up old images to save disk space..."
                             sudo docker system prune -f
                         '
